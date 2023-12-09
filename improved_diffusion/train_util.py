@@ -8,6 +8,7 @@ import torch as th
 import torch.distributed as dist
 from torch.nn.parallel.distributed import DistributedDataParallel as DDP
 from torch.optim import AdamW
+import time
 
 from . import dist_util, logger
 from .fp16_util import (
@@ -117,12 +118,15 @@ class TrainLoop:
         if resume_checkpoint:
             self.resume_step = parse_resume_step_from_filename(resume_checkpoint)
             if dist.get_rank() == 0:
+                tstart = time.time()
                 logger.log(f"loading model from checkpoint: {resume_checkpoint}...")
                 self.model.load_state_dict(
                     dist_util.load_state_dict(
                         resume_checkpoint, map_location=dist_util.dev()
                     )
                 )
+                tend = time.time()
+                logger.log(f"finished loading states in : {tend - tstart}s")
 
         dist_util.sync_params(self.model.parameters())
 
@@ -251,6 +255,8 @@ class TrainLoop:
     def _log_grad_norm(self):
         sqsum = 0.0
         for p in self.master_params:
+            if p.grad is None:
+                logger.log("something is wrong!!... or not?")
             sqsum += (p.grad ** 2).sum().item()
         logger.logkv_mean("grad_norm", np.sqrt(sqsum))
 

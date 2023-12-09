@@ -5,7 +5,7 @@ numpy array. This can be used to produce samples for FID evaluation.
 
 import argparse
 import os
-
+import time
 import numpy as np
 import torch as th
 import torch.distributed as dist
@@ -35,6 +35,8 @@ def main():
     )
     model.to(dist_util.dev())
     model.eval()
+
+    tick = time.time()
 
     logger.log("sampling...")
     all_images = []
@@ -85,6 +87,10 @@ def main():
             np.savez(out_path, arr)
 
     dist.barrier()
+
+    tock = time.time()
+    logger.log(f"total sampling time consumed: {(tock - tick)/3600} hours")
+
     logger.log("sampling complete")
 
 

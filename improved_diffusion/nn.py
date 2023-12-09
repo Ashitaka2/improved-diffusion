@@ -168,3 +168,9 @@ class CheckpointFunction(th.autograd.Function):
         del ctx.input_params
         del output_tensors
         return (None, None) + input_grads
+    
+def count_parameters(model, requires_grad=True):
+    if requires_grad:
+        return sum(p.numel() for p in model.parameters() if p.requires_grad)
+    else:
+        return sum(p.numel() for p in model.parameters())

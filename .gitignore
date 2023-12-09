@@ -1,3 +1,16 @@
 .DS_Store
 __pycache__/
 
+cifar_all
+cifar_test
+cifar_train
+datasets
+cifar_archive.npz
+improved_diffusion.egg-info/
+
+pretrained
+samples
+samples2
+samples3
+samples4
+samples5

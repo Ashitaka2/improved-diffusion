@@ -14,6 +14,7 @@ from improved_diffusion.script_util import (
     add_dict_to_argparser,
 )
 from improved_diffusion.train_util import TrainLoop
+from improved_diffusion.nn import count_parameters
 
 
 def main():
@@ -28,6 +29,17 @@ def main():
     )
     model.to(dist_util.dev())
     schedule_sampler = create_named_schedule_sampler(args.schedule_sampler, diffusion)
+
+    logger.log(f"Total parameters: {count_parameters(model, requires_grad=False)}")
+    logger.log(f"Trainable parameters: {count_parameters(model, requires_grad=True)}")
+
+    #debugging model params
+    # count = 0 
+    # for name, param in model.named_parameters():
+    #     if param.grad is None:
+    #         logger.log(f"No gradient for parameter: {name}")
+    #         count += 1
+    # logger.log(f"the number of unused grads are : {count}")
 
     logger.log("creating data loader...")
     data = load_data(
